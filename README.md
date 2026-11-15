@@ -1,6 +1,6 @@
 # Střihnuto.cz
 
-Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních závislostí, externích fontů, analytiky, reklamy, databáze a backendu. Obsahová verze v0.3.
+Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních závislostí, externích fontů, analytiky, reklamy, databáze a backendu. Verze v0.4.
 
 ## Spuštění
 
@@ -56,9 +56,14 @@ Budoucí zapnutí:
 
 Zapnutí bez příběhu, bez některého pole nebo bez potvrzení souhlasu způsobí chybu buildu. Texty se při vykreslení escapují, nevkládejte HTML. Nejsou připravené žádné fiktivní klientské příklady. Testovací sentinel `<TEST>` slouží jen k ověření escapování a není součástí veřejného výstupu.
 
-## Budoucí fotografie Lucie
+## Fotografie Lucie (v0.4)
 
-V sekci `#lucie` je místo skutečného portrétu původní bílý symbol spolku. Po dodání schválené fotografie ji vložte do `assets/` a nahraďte blok `.lucie-mark` obrázkem s třídou `lucie-photo`, výstižným alternativním textem a skutečnými rozměry. Třída má připravené responzivní rozložení. Žádná cizí osoba ani falešný portrét nejsou použity.
+V sekci `#lucie` je skutečná fotografie Lucie Tesařové z dodaného `lucka.png.zip`. Bez retuší, AI úprav nebo změn barev a pozadí. Originál má 1199 × 1312 px; export má mírný symetrický boční ořez na poměr 4:5, bez ořezu hlavy. Převod pomocí Pillow: Lanczos, WebP quality 86, method 6. Pillow není závislostí projektu ani buildu.
+
+- `assets/lucie-tesarova-420.webp`: 420 × 525 px, 27 154 B (26,5 KiB).
+- `assets/lucie-tesarova-840.webp`: 840 × 1050 px, 87 612 B (85,6 KiB).
+
+Responzivní `srcset` a `sizes`, explicitní rozměry, lazy loading a asynchronní dekódování. Použita již připravená třída `.lucie-photo`; CSS se nemění. Originál není kopírován do veřejného výstupu.
 
 ## Hosting
 
@@ -96,3 +101,11 @@ Projekt je zároveň běžný statický web: **framework None (HTML/CSS)**, **bu
 
 - `npm test`: všech devět testů prošlo; `npm run build`: úspěch.
 - Porovnáním s výchozím main ověřena přesná shoda formuláře, CSS, grafických podkladů, build skriptů a vypnutých dat příběhů.
+
+## Změny v0.4
+
+Grafický symbol v sekci Lucie nahrazen originální fotografií ve dvou optimalizovaných velikostech WebP. Schválené texty, ostatní sekce, CSS, formulář a vypnuté příběhy zůstaly beze změny. Bez nových závislostí nebo zásahů do hostingu a DNS.
+
+### Ověření v0.4
+
+`npm test`: 9 úspěšných testů. `npm run build`: úspěch. Chromium / Playwright: 375 px a 768 px při DPR 2, 1440 px při DPR 1; načtení fotografie, výběr srcset, zachovaný poměr stran a žádné vodorovné přetečení. Ořez vizuálně ověřen na mobilu i počítači, hlava a obličej zůstávají celé. Jde o emulaci v Chromiu, nikoliv fyzická zařízení.
