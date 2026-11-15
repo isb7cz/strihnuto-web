@@ -68,7 +68,7 @@ test('Formulář má popsaná povinná pole, nepovinný e-mail a nepředstírá 
 
 test('Budoucí příběhy: výchozí stav skrytý, chybějící data a souhlas blokují zveřejnění', async () => {
   const data = JSON.parse(await readFile(new URL('data/client-stories.json', root), 'utf8'));
-  assert.equal(typeof data.enabled, 'boolean');
+  assert.equal(data.enabled, false, 'Příběhy zůstávají ve verzi v0.3 vypnuté');
   assert.deepEqual(renderClientStories({ ...data, enabled: false }), { section: '', navigation: '' });
   assert.throws(() => renderClientStories({ ...data, enabled: true, stories: [] }), /bez skutečného příběhu/);
   assert.throws(() => renderClientStories({ ...data, enabled: true, stories: [{}] }), /souhlasu/);
@@ -97,4 +97,33 @@ test('Build obsahuje pouze veřejné soubory a žádné skryté příběhy nebo 
     for (const value of [heading, ...paragraphs]) assert.ok(text(built).includes(value));
   }
   assert.equal(await readFile(new URL('dist/assets/STRIHNUTO-vodorovne-barevne.svg', root), 'utf8'), await readFile(new URL('assets/STRIHNUTO-vodorovne-barevne.svg', root), 'utf8'));
+});
+
+
+test('Úvod a fungování mají přesně schválené samostatné odstavce', () => {
+  for (const id of ['uvod', 'jak-fungujeme']) {
+    const section = html.match(new RegExp(`<section\\b[^>]*\\bid="${id}"[^>]*>([\\s\\S]*?)</section>`))[1];
+    const paragraphs = [...section.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/g)]
+      .filter(([tag]) => !tag.includes('class="eyebrow"'))
+      .map(([, content]) => text(content));
+    assert.deepEqual(paragraphs, copy[id].paragraphs);
+  }
+});
+
+test('Název, celé jméno a adresa v patičce odpovídají v0.3; působnost se nemění', async () => {
+  assert.doesNotMatch(html, /STŘIHNUTO/);
+  assert.match(html, /<title>Střihnuto\.cz/);
+  assert.match(html, /alt="Střihnuto, z\. s\."/);
+  assert.match(html, /aria-label="Střihnuto — úvod"/);
+  assert.equal((html.match(/Lucie Tesařová/g) || []).length, 2);
+  const footer = text(html.match(/<footer>[\s\S]*?<\/footer>/)[0]);
+  assert.ok(footer.includes('Střihnuto, z. s. IČO: 30204101 Blahoslavova 430, Moravské Budějovice'));
+  assert.ok(footer.includes('made by ISB7'));
+  assert.ok(!footer.includes('Okres Třebíč'));
+  assert.equal((html.match(/Blahoslavova 430, Moravské Budějovice/g) || []).length, 1);
+  const area = html.match(/<section[^>]*id="oblast"[^>]*>([\s\S]*?)<\/section>/)[1];
+  assert.match(area, /na území celého okresu Třebíč/);
+  assert.match(area, /Okres Třebíč/);
+  const stories = await readFile(new URL('data/client-stories.json', root), 'utf8');
+  assert.doesNotMatch(stories, /STŘIHNUTO/);
 });

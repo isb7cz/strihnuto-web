@@ -1,6 +1,6 @@
-# STŘIHNUTO.cz
+# Střihnuto.cz
 
-Český statický prezentační web spolku STŘIHNUTO, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních závislostí, externích fontů, analytiky, reklamy, databáze a backendu. Obsahová verze v0.2.
+Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních závislostí, externích fontů, analytiky, reklamy, databáze a backendu. Obsahová verze v0.3.
 
 ## Spuštění
 
@@ -19,7 +19,7 @@ npm test
 npm run build
 ```
 
-Sedm testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha z požadavku v0.2 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
+Devět testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
 Build vytváří `dist/` pouze s `index.html`, `styles.css` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. Žádný JavaScript neběží v prohlížeči; renderer příběhů se používá jen při sestavení.
 
@@ -81,3 +81,18 @@ Projekt je zároveň běžný statický web: **framework None (HTML/CSS)**, **bu
 - Chromium / Playwright: 375×812, 390×844, 768×1024 a 1440×1000; obrázky, navigace, přeskočení na obsah klávesnicí a žádné vodorovné přetečení či externí požadavky.
 - Ověřeno vyplnění povinných polí bez e-mailu, vypnuté odeslání, Enter a `requestSubmit()` bez přenosu údajů, absence příběhů a nedostupnost dat příběhů z veřejného serveru.
 - Kontrola vypočtených kontrastů textů v Chromiu bez zjištěných selhání. Nejde o úplný audit přístupnosti ani test na fyzickém iPhonu či v Safari.
+
+## Změny v0.3
+
+- Úvodní nadpis a oba odstavce nahrazené přesným nově schváleným zněním.
+- Sekce „Jak fungujeme?“ má tři nové schválené odstavce o neziskovém poslání a financování.
+- Celé jméno Lucie Tesařová doplněné ve dvou určených odstavcích.
+- Název sjednocený na Střihnuto, oficiální textové označení Střihnuto, z. s., včetně metadat, popisků a patičky. Originální logo, soubory a technické názvy jsou beze změny.
+- Pouze identifikační adresa v patičce změněna na Blahoslavova 430, Moravské Budějovice; působnost nadále celý okres Třebíč.
+- Ostatní schválené texty, vzhled, formulář a vypnuté příběhy zachovány. Bez nových závislostí, zásahů do hostingu či DNS.
+- Aktualizovaná testovací předloha a kontroly názvu, adresy, odstavců a vypnutých příběhů. `npm test` a `npm run build` jsou povinné kontroly této verze.
+
+### Ověření v0.3
+
+- `npm test`: všech devět testů prošlo; `npm run build`: úspěch.
+- Porovnáním s výchozím main ověřena přesná shoda formuláře, CSS, grafických podkladů, build skriptů a vypnutých dat příběhů.
