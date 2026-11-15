@@ -115,7 +115,7 @@ test('Název, celé jméno a adresa v patičce odpovídají v0.3; působnost se 
   assert.match(html, /<title>Střihnuto\.cz/);
   assert.match(html, /alt="Střihnuto, z\. s\."/);
   assert.match(html, /aria-label="Střihnuto — úvod"/);
-  assert.equal((html.match(/Lucie Tesařová/g) || []).length, 2);
+  assert.equal((text(html).match(/Lucie Tesařová/g) || []).length, 2);
   const footer = text(html.match(/<footer>[\s\S]*?<\/footer>/)[0]);
   assert.ok(footer.includes('Střihnuto, z. s. IČO: 30204101 Blahoslavova 430, Moravské Budějovice'));
   assert.ok(footer.includes('made by ISB7'));
