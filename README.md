@@ -1,6 +1,6 @@
 # Střihnuto.cz
 
-Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních závislostí, externích fontů, analytiky, reklamy, databáze a backendu. Verze v0.4.
+Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních balíčkových závislostí, externích fontů, analytiky, reklamy a databáze klientů. Verze v0.5 má Worker pro kontaktní formulář a Cloudflare Turnstile.
 
 ## Spuštění
 
@@ -19,19 +19,46 @@ npm test
 npm run build
 ```
 
-Devět testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
+Devatenáct testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
-Build vytváří `dist/` pouze s `index.html`, `styles.css` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. Žádný JavaScript neběží v prohlížeči; renderer příběhů se používá jen při sestavení.
+Build vytváří `dist/` pouze s `index.html`, `styles.css`, `contact.js` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. `contact.js` a Cloudflare Turnstile běží v prohlížeči; renderer příběhů se používá jen při sestavení. Worker se sestavuje samostatně pomocí Wrangleru a není statickým souborem v dist.
 
-## Kontaktní formulář — skutečný stav
+## Kontaktní formulář v0.5 — skutečný stav
 
-Formulář je připravené rozhraní, **odesílání není zapojené**. V původní verzi žádné odesílání neexistovalo. Povinná pole: jméno, telefon, obec, typ poptávky a popis požadavku. E-mail je nepovinný, vlastní e-mail tedy není podmínkou budoucího použití.
+Implementace je připravená a otestovaná se simulovanými službami. **Produkční doručení nebylo ověřeno; nic nebylo nasazeno.** `npm run dev` podává pouze statický web, takže lokálně skutečné odesílání nefunguje. Pro Worker použijte po přípravě vlastní konfigurace `wrangler dev --config <vaše-konfigurace>`; lokální náhrady bindingů nejsou důkazem doručení.
 
-Návštěvník vidí upozornění na nefunkční odesílání a vypnuté odesílací tlačítko. Formulář používá `method="dialog"` mimo dialog: nedělá síťový požadavek ani při implicitním odeslání klávesou Enter, bez JavaScriptu či při programovém `requestSubmit()`. Údaje neukládáme, nepřenášíme do URL ani neodesíláme. Nezobrazuje se potvrzení doručení. Není to rezervační systém.
+Pole zůstávají stejná: jméno, telefon, obec, typ poptávky a popis jsou povinné, e-mail zákazníka nepovinný. Tlačítko se zapne po ověření Turnstile. JavaScript odešle JSON na stejný origin `/api/contact`; bez JavaScriptu zůstává tlačítko vypnuté a `method="dialog"` brání přenosu údajů do URL. Při chybě údaje zůstávají ve formuláři, při úspěšném předání službě se vymažou. Během odesílání je tlačítko blokované, automatické opakování se neprovádí.
 
-Budoucí zprovoznění vyžaduje samostatné rozhodnutí o doručování, ochraně proti spamu a zpracování osobních údajů. Teprve pak změňte způsob odeslání, zapojte endpoint, povolte tlačítko a otestujte skutečné doručení i chyby. V této verzi se nezavádí externí poskytovatel ani placená služba.
+Worker (`worker/index.mjs`, `worker/contact.mjs`) kontroluje origin, JSON do 12 000 B i bez Content-Length, délky polí, telefon, nepovinný e-mail a typ poptávky. Ověřuje token na serveru včetně `success`, `hostname` a `action=contact`; tokeny jsou jednorázové podle pravidel Turnstile. Tajný klíč se nikam neposílá kromě Siteverify. Timeout či chyba ověření odeslání zastaví.
 
-Skutečný kontaktní e-mail není dodán; v kontaktu i patičce je označen TODO bez falešného odkazu. Informace o ochraně osobních údajů je také potřeba doplnit podle skutečného provozu; zatím nemá neexistující odkaz.
+Ochrana proti spamu: Turnstile, neveřejné honeypot pole a Workers Rate Limiting binding (v šabloně 3 požadavky za 60 sekund na hash IP). Limit se kontroluje před ověřením a odesláním. Cloudflare rate limiting je distribuovaný a není globálně přesnou kvótou ani absolutní ochranou proti distribuovanému spamu. Při nedostupném limitu či chybějících bindinzích Worker odmítne odeslání.
+
+E-mail jde výhradně na serverem pevně nastavené `imperium@isb7.cz`. Obsahuje typ péče i všechna pole; při chybějícím e-mailu uvádí „Neuveden“. Případný zákaznický e-mail je pouze Reply-To, nikdy From nebo příjemce. Text zprávy je MIME UTF-8/base64; hlavičky neobsahují neověřený volný text. `CONTACT_EMAIL.send()` musí úspěšně skončit před HTTP 200. To znamená **přijetí doručovací službou, nikoliv důkaz doručení do schránky**. Při selhání je HTTP 502 a srozumitelná chyba. Při přerušení spojení nelze přijetí spolehlivě potvrdit: před opakováním zkontrolujte schránku, aby nevznikla duplicitní poptávka.
+
+Neukládáme klientské údaje do databáze, KV, localStorage ani logů aplikace. IP se používá pro Siteverify a jako SHA-256 klíč krátkodobého platformního limitu; obsah poptávky zůstává pouze ve zpracovávaném požadavku a cílovém e-mailu. Retence schránky a případné platformní request logy závisejí na nastavení provozovatele. Informace o ochraně osobních údajů je stále nutné připravit pro skutečný provoz. Cílová schránka není automaticky zveřejněna jako kontaktní adresa; původní veřejný kontakt TODO zůstává zachovaný.
+
+## Co nastavit v Cloudflare (ručně, bez změn provedených v tomto PR)
+
+`wrangler.example.jsonc` je **pouze šablona**, není aktivní konfigurací a obsahuje povinně nahraditelné hodnoty. Neměňte současné Workers jméno, doménu, routes ani DNS podle šablony naslepo. Tato změna vyžaduje přidat serverový vstup do existujícího Workera se statickými assets; samotné nahrání dist nestačí.
+
+1. **Turnstile:** v dashboardu otevřete widget se Site Key `0x4AAAAAAGCCjx_5Khzyd-a-`. Nastavte typ **Managed** a povolte skutečný hostname webu. Managed se volí v dashboardu, není to domyšlený parametr JS. Přidejte Secret Key tohoto widgetu do existujícího Workera jako šifrovaný secret **`TURNSTILE_SECRET_KEY`** (Workers & Pages → Worker → Settings → Variables and Secrets → Add → Secret). Nikdy jej nedávejte do GitHubu ani do chatu.
+2. **Příjemce:** v Email → Email Routing → Destination addresses přidejte `imperium@isb7.cz` a potvrďte ověřovací e-mail v této schránce. Stav musí být ověřený. Nelze posílat libovolným neověřeným příjemcům.
+3. **Odesílatel:** vyberte vlastní adresu na doméně se zprovozněným Cloudflare Email Routing a nastavte ji jako **`MAIL_FROM`**. Nepoužívejte e-mail zákazníka. Pokud Email Routing zatím nemáte a jeho zapnutí požaduje MX/TXT/DNS změny, zastavte se: to je samostatný krok vlastníka domény a tento PR žádné změny DNS nepovoluje ani neprovádí. Ověřte také dostupnost send_email bindingu a aktuální limity pro váš účet; bez potřebné domény nelze slíbit funkční bezplatné doručování. Žádná placená ani externí služba není automaticky zavedená.
+4. **Bindingy:** do skutečné konfigurace existujícího Workera přeneste `send_email` binding **`CONTACT_EMAIL`** s `destination_address: "imperium@isb7.cz"` a `ratelimits` binding **`CONTACT_RATE_LIMITER`** (3 / 60 s). `namespace_id` v šabloně je příklad; zvolte stabilní číselnou hodnotu nekolidující s dalšími vašimi limitery. Doplňte **`SITE_ORIGIN`** jako přesný HTTPS origin skutečného webu bez koncového lomítka (např. schéma a hostname, případně port). Worker odmítá jiný origin i hostname Turnstile.
+5. **Server a assets:** vstup `worker/index.mjs`, statické assets z `dist`, binding **`ASSETS`**, API `/api/*` musí jít nejprve do Workera (`run_worker_first`). Zachovejte současné hostingové nastavení a doménu. Šablona je ověřena jen dry-runem, nikoli na vašem účtu.
+6. Po samostatně schváleném nastavení a nasazení postupujte podle následujícího testu. V tomto PR se nic nenasazuje.
+
+Oficiální podklady: [Send Email from Workers](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/), [Turnstile server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [Rate Limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Podmínky a limity ověřte před aktivací v aktuálním dashboardu; tento projekt nepředpokládá neověřenou existující konfiguraci.
+
+## Jak ověřit skutečné doručení
+
+Až budou nastavené bindingy a secret a bude zvlášť povolené nasazení:
+
+1. Na skutečné povolené doméně odešlete ručně poptávku s jednoznačným testovacím označením, nejprve bez zákaznického e-mailu. Použijte pouze vlastní testovací kontaktní údaje. Turnstile musí proběhnout v Managed režimu.
+2. Ověřte HTTP 200, hlášku o předání službě a následně **skutečný e-mail v imperium@isb7.cz**, včetně spamu. Zkontrolujte češtinu, telefon, obec, zprávu a označení běžné péče. Jen HTTP 200 není důkaz doručení.
+3. Po vypršení minutového limitu zopakujte pro zvýhodněnou péči a vlastní nepovinný e-mail; ověřte Reply-To a typ péče v předmětu i těle.
+4. V odděleném testovacím Workeru ověřte chybný/expirující token, opakování tokenu, překročení limitu a chybějící e-mailový binding. Musí následovat chyba, nikdy falešný úspěch; neničte kvůli testu produkční nastavení.
+5. Pokud zpráva není ve schránce, ověřte příjemce, MAIL_FROM a stav Email Routing. Neopakujte bez kontroly slepě zprávy a nesdílejte logy s obsahem klientských údajů. Po testu testovací e-maily podle potřeby odstraňte.
 
 ## Příběhy klientů — připravené, nezveřejněné
 
@@ -69,7 +96,7 @@ Responzivní `srcset` a `sizes`, explicitní rozměry, lazy loading a asynchronn
 
 Podle zadání již web běží na Cloudflare Workers. Tato aktualizace nemění hosting, konfiguraci Cloudflare ani DNS a neprovádí deployment. Zachovejte současné nastavení hostingu.
 
-Projekt je zároveň běžný statický web: **framework None (HTML/CSS)**, **build command `npm run build`**, **output directory `dist`**. Tyto hodnoty lze použít také pro Cloudflare Pages, pokud by v budoucnu bylo samostatně rozhodnuto o jeho použití.
+Prezentační část: **framework None (HTML/CSS)**, **build command `npm run build`**, **output directory `dist`**. Od v0.5 ale samotný statický hosting pro formulář nestačí: serverový vstup je `worker/index.mjs` s bindingy popsanými výše. Přechod na Pages by vyžadoval samostatné rozhodnutí a serverovou integraci; není součástí tohoto PR.
 
 ## Změny v0.2
 
@@ -109,3 +136,13 @@ Grafický symbol v sekci Lucie nahrazen originální fotografií ve dvou optimal
 ### Ověření v0.4
 
 `npm test`: 9 úspěšných testů. `npm run build`: úspěch. Chromium / Playwright: 375 px a 768 px při DPR 2, 1440 px při DPR 1; načtení fotografie, výběr srcset, zachovaný poměr stran a žádné vodorovné přetečení. Ořez vizuálně ověřen na mobilu i počítači, hlava a obličej zůstávají celé. Jde o emulaci v Chromiu, nikoliv fyzická zařízení.
+
+## Změny a ověření v0.5
+
+Zapojený klient formuláře, Turnstile Siteverify a Worker s validací, honeypotem, rate limiterem a příjemcem imperium@isb7.cz. Přibyla pouze šablona konfigurace a testy, žádná aktivní konfigurace, tajný klíč, databáze ani produkční balíčková závislost. Schválené texty mimo stav formuláře, ostatní sekce, fotografie a CSS jsou zachované.
+
+- `npm test`: 19 úspěšných testů; `npm run build`: úspěch.
+- Wrangler 4.162.0: `deploy --dry-run` s lokální validační konfigurací úspěšně sestavil Worker a rozpoznal Email, Rate Limit a Assets bindingy. Nebyl proveden deployment ani účetní ověření skutečných bindingů.
+- Testy doručování a Siteverify používají simulace. Skutečné doručení zatím **neověřeno**.
+
+- Chromium / Playwright se simulovaným Turnstile a HTTP službou: 375, 768 a 1440 px; ověřený nepovinný e-mail, blokace souběžného odesílání, zachování polí při chybě, vymazání až po úspěchu a absence přetečení. Toto není živý test Managed challenge ani e-mailu.
