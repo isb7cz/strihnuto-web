@@ -1,16 +1,16 @@
 # STŘIHNUTO.cz
 
-Český statický web spolku STŘIHNUTO, z. s. Bez backendu, trackerů, externích fontů a produkčních závislostí. Originální logo a ikony pocházejí z dodaného STRIHNUTO-web.zip.
+Český statický prezentační web spolku STŘIHNUTO, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních závislostí, externích fontů, analytiky, reklamy, databáze a backendu. Obsahová verze v0.2.
 
 ## Spuštění
 
-Vyžaduje Node.js 22+ pro testy a build a Python 3 pro lokální server. Není potřeba npm install.
+Node.js 22+ pro testy a build, Python 3 pro lokální server. `npm install` není potřeba.
 
 ```sh
 npm run dev
 ```
 
-Server běží na portu 8080. Používá standardní Python HTTP server, pouze pro lokální vývoj.
+Příkaz nejprve sestaví web a poté podává pouze veřejný obsah `dist/` na portu 8080. Po změně zdrojů spusťte `npm run build` a obnovte prohlížeč. Server je určen pouze pro lokální vývoj.
 
 ## Testy a build
 
@@ -19,22 +19,65 @@ npm test
 npm run build
 ```
 
-Testy ověřují strukturu, lokální odkazy a podklady, metadata a absenci falešných kontaktů či vzdálených závislostí. Build vytvoří čistý adresář dist/ s veřejnými soubory. Prohlížečové ověření se provádí samostatně; není součástí npm test.
+Sedm testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha z požadavku v0.2 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
-## Ověření první verze
+Build vytváří `dist/` pouze s `index.html`, `styles.css` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. Žádný JavaScript neběží v prohlížeči; renderer příběhů se používá jen při sestavení.
 
-- `npm test`: 3 úspěšné testy.
-- `npm run build`: úspěšně sestavený statický web.
-- Chromium / Playwright: rozměry 375×812, 390×844, 768×1024 a 1440×1000; bez vodorovného přetečení, obrázky načtené, navigace a přeskočení na obsah klávesnicí fungují. Žádné externí požadavky ani chyby JavaScriptu. Jde o emulaci velikostí v Chromiu, nikoliv test na fyzickém iPhonu nebo v Safari.
+## Kontaktní formulář — skutečný stav
 
-## Nasazení na Cloudflare Pages
+Formulář je připravené rozhraní, **odesílání není zapojené**. V původní verzi žádné odesílání neexistovalo. Povinná pole: jméno, telefon, obec, typ poptávky a popis požadavku. E-mail je nepovinný, vlastní e-mail tedy není podmínkou budoucího použití.
 
-Připojte repozitář, zvolte framework None, build příkaz `npm run build` a výstupní složku `dist`. Kořen projektu je kořen repozitáře. Nejsou potřeba proměnné ani tajné údaje. Alternativně nahrajte obsah dist ručně. Nasazení ani DNS nebyly v rámci implementace změněny.
+Návštěvník vidí upozornění na nefunkční odesílání a vypnuté odesílací tlačítko. Formulář používá `method="dialog"` mimo dialog: nedělá síťový požadavek ani při implicitním odeslání klávesou Enter, bez JavaScriptu či při programovém `requestSubmit()`. Údaje neukládáme, nepřenášíme do URL ani neodesíláme. Nezobrazuje se potvrzení doručení. Není to rezervační systém.
 
-## Doplnit před zveřejněním
+Budoucí zprovoznění vyžaduje samostatné rozhodnutí o doručování, ochraně proti spamu a zpracování osobních údajů. Teprve pak změňte způsob odeslání, zapojte endpoint, povolte tlačítko a otestujte skutečné doručení i chyby. V této verzi se nezavádí externí poskytovatel ani placená služba.
 
-- Skutečný e-mail: nahraďte TODO v sekci Kontakt skutečným odkazem mailto.
-- Rozhodnutí o telefonním kontaktu.
-- Právní dokumenty a jejich skutečné odkazy v patičce, až budou existovat.
+Skutečný kontaktní e-mail není dodán; v kontaktu i patičce je označen TODO bez falešného odkazu. Informace o ochraně osobních údajů je také potřeba doplnit podle skutečného provozu; zatím nemá neexistující odkaz.
 
-Ceny, reference a pravidla zvýhodnění nejsou vymyšlené. Web nemá formulář, cookies, analytiku ani reklamy. Informace o zpracování údajů při následné e-mailové komunikaci je potřeba připravit podle skutečného provozu. Kanonickou URL a sitemap doplňte po určení finální domény; před nasazením ověřte kontakty a obsah.
+## Příběhy klientů — připravené, nezveřejněné
+
+Soubor `data/client-stories.json` má `enabled: false` a prázdné pole `stories`. Obsahuje přesný schválený nadpis a oba úvodní odstavce. `scripts/client-stories.mjs` připravuje sekci i navigační odkaz pouze při buildu. Ve vypnutém stavu není ve veřejném HTML ani navigaci nic z této sekce, žádné prázdné karty či skryté profily. Data samotná se do `dist/` nikdy nekopírují.
+
+Budoucí zapnutí:
+
+1. Získejte skutečné anonymizované příběhy a souhlasy klientů se zveřejněním.
+2. Do `stories` přidejte záznamy s následujícími poli. Zapisujte jen schválené údaje určené ke zveřejnění, bez jmen či citlivých pracovních poznámek.
+3. Nastavte `enabled` na `true` a spusťte `npm test` a `npm run build`. Sekce se objeví mezi Lucií a oblastí působení, automaticky přibude i položka navigace.
+4. Zkontrolujte hotový obsah v `dist/`. Vypnutí se provádí vrácením `enabled` na `false` a novým buildem.
+
+| Pole záznamu | Typ a význam |
+| --- | --- |
+| `clientLabel` | Neprázdný text: anonymizované označení klienta |
+| `approximateAge` | Neprázdný text: přibližný věk |
+| `area` | Neprázdný text: přibližná oblast |
+| `situation` | Neprázdný text: skutečná životní situace |
+| `service` | Neprázdný text: skutečně poskytnutá služba |
+| `review` | Neprázdný text: autentické hodnocení klienta |
+| `consentConfirmed` | `true` až po potvrzení souhlasu; příznak nenahrazuje evidenci souhlasu |
+
+Zapnutí bez příběhu, bez některého pole nebo bez potvrzení souhlasu způsobí chybu buildu. Texty se při vykreslení escapují, nevkládejte HTML. Nejsou připravené žádné fiktivní klientské příklady. Testovací sentinel `<TEST>` slouží jen k ověření escapování a není součástí veřejného výstupu.
+
+## Budoucí fotografie Lucie
+
+V sekci `#lucie` je místo skutečného portrétu původní bílý symbol spolku. Po dodání schválené fotografie ji vložte do `assets/` a nahraďte blok `.lucie-mark` obrázkem s třídou `lucie-photo`, výstižným alternativním textem a skutečnými rozměry. Třída má připravené responzivní rozložení. Žádná cizí osoba ani falešný portrét nejsou použity.
+
+## Hosting
+
+Podle zadání již web běží na Cloudflare Workers. Tato aktualizace nemění hosting, konfiguraci Cloudflare ani DNS a neprovádí deployment. Zachovejte současné nastavení hostingu.
+
+Projekt je zároveň běžný statický web: **framework None (HTML/CSS)**, **build command `npm run build`**, **output directory `dist`**. Tyto hodnoty lze použít také pro Cloudflare Pages, pokud by v budoucnu bylo samostatně rozhodnuto o jeho použití.
+
+## Změny v0.2
+
+- Schválené texty úvodu, důvodu vzniku, příjemců péče, fungování spolku, služeb, zvýhodnění, Lucie, oblasti a kontaktu vložené doslovně; staré marketingové formulace odstraněny i z metadat.
+- Doplněna skupina pečujících osob, více než 25 let praxe a plný popis individuálního posouzení i kapacit.
+- Původní logo, paleta a typografie zachovány. Drobné úpravy rozložení pro delší texty, tři skupiny klientů a formulář.
+- Připravené neveřejné příběhy a budoucí skutečná fotografie Lucie.
+- Patička s názvem, IČO, okresem a nenápadným textovým podpisem `made by ISB7` bez odkazu.
+- Formulář bez předstírání odesílání; kontakt a právní dokumenty zůstávají k doplnění.
+
+## Ověření v0.2
+
+- `npm test`: sedm úspěšných testů; `npm run build`: úspěch.
+- Chromium / Playwright: 375×812, 390×844, 768×1024 a 1440×1000; obrázky, navigace, přeskočení na obsah klávesnicí a žádné vodorovné přetečení či externí požadavky.
+- Ověřeno vyplnění povinných polí bez e-mailu, vypnuté odeslání, Enter a `requestSubmit()` bez přenosu údajů, absence příběhů a nedostupnost dat příběhů z veřejného serveru.
+- Kontrola vypočtených kontrastů textů v Chromiu bez zjištěných selhání. Nejde o úplný audit přístupnosti ani test na fyzickém iPhonu či v Safari.

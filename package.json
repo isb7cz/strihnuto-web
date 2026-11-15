@@ -1,1 +1,14 @@
-{"name":"strihnuto-web","private":true,"version":"1.0.0","type":"module","engines":{"node":">=22"},"scripts":{"dev":"python3 -m http.server 8080 --bind 0.0.0.0","build":"node scripts/build.mjs","test":"node --test"}}
+{
+  "name": "strihnuto-web",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run build && python3 -m http.server 8080 --bind 0.0.0.0 --directory dist",
+    "build": "node scripts/build.mjs",
+    "test": "node --test"
+  }
+}
