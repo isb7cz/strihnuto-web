@@ -10,7 +10,7 @@ const html = (await readFile(new URL('index.html', root), 'utf8'))
 await rm(new URL('dist', root), { recursive: true, force: true });
 await mkdir(new URL('dist', root));
 await writeFile(new URL('dist/index.html', root), html);
-for (const file of ['styles.css', 'assets', 'contact.js']) {
+for (const file of ['styles.css', 'assets', 'contact.js', 'ochrana-osobnich-udaju']) {
   await cp(new URL(file, root), new URL(`dist/${file}`, root), { recursive: true });
 }
 console.log('Statický web sestaven do dist/.');

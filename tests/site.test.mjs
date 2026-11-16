@@ -43,15 +43,16 @@ test('Navigace vede na existující unikátní cíle', () => {
 
 test('Zdroje existují, povolený externí skript je pouze Turnstile, kontakty nejsou vymyšlené', async () => {
   for (const [, path] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
-    if (path.startsWith('#')) continue;
+    if (path.startsWith('#') || path === 'mailto:lucie@strihnuto.cz') continue;
     if (path === 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onContactTurnstileLoad&amp;render=explicit') continue;
     assert.ok(!path.includes('://'), path);
-    await access(new URL(path, root));
+    await access(new URL(path.replace(/^\//, ''), root));
   }
-  assert.doesNotMatch(html, /<iframe|mailto:|tel:/i);
+  assert.doesNotMatch(html, /<iframe|tel:/i);
+  assert.deepEqual([...html.matchAll(/href="(mailto:[^"]+)"/g)].map(m => m[1]), ['mailto:lucie@strihnuto.cz', 'mailto:lucie@strihnuto.cz']);
   const sources = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
   assert.deepEqual(sources, ['contact.js', 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onContactTurnstileLoad&amp;render=explicit']);
-  assert.match(html, /TODO: doplnit kontaktní e-mail/);
+  assert.doesNotMatch(html, /TODO|imperium@isb7\.cz/);
 });
 
 test('Formulář má popsaná povinná pole, nepovinný e-mail a nepředstírá odeslání', () => {
@@ -89,7 +90,9 @@ test('Budoucí příběhy: výchozí stav skrytý, chybějící data a souhlas b
 test('Build obsahuje pouze veřejné soubory a žádné skryté příběhy nebo jejich data', async () => {
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root });
   const built = await readFile(new URL('dist/index.html', root), 'utf8');
-  assert.deepEqual((await readdir(new URL('dist/', root))).sort(), ['assets', 'contact.js', 'index.html', 'styles.css']);
+  assert.equal(await readFile(new URL('dist/ochrana-osobnich-udaju/index.html', root), 'utf8'), await readFile(new URL('ochrana-osobnich-udaju/index.html', root), 'utf8'));
+  assert.doesNotMatch(built, /TODO|imperium@isb7\.cz/);
+  assert.deepEqual((await readdir(new URL('dist/', root))).sort(), ['assets', 'contact.js', 'index.html', 'ochrana-osobnich-udaju', 'styles.css']);
   const data = JSON.parse(await readFile(new URL('data/client-stories.json', root), 'utf8'));
   if (data.enabled) {
     assert.match(built, /id="pribehy"/);
