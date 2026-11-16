@@ -19,7 +19,7 @@ npm test
 npm run build
 ```
 
-Devatenáct testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
+Dvacet testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
 Build vytváří `dist/` pouze s `index.html`, `styles.css`, `contact.js` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. `contact.js` a Cloudflare Turnstile běží v prohlížeči; renderer příběhů se používá jen při sestavení. Worker se sestavuje samostatně pomocí Wrangleru a není statickým souborem v dist.
 
@@ -39,13 +39,17 @@ Neukládáme klientské údaje do databáze, KV, localStorage ani logů aplikace
 
 ## Co nastavit v Cloudflare (ručně, bez změn provedených v tomto PR)
 
-`wrangler.example.jsonc` je **pouze šablona**, není aktivní konfigurací a obsahuje povinně nahraditelné hodnoty. Neměňte současné Workers jméno, doménu, routes ani DNS podle šablony naslepo. Tato změna vyžaduje přidat serverový vstup do existujícího Workera se statickými assets; samotné nahrání dist nestačí.
+V kořeni je skutečný **`wrangler.jsonc`**, který použije stávající deploy command `npx wrangler deploy`. Worker zůstává **`strihnuto-web`**, origin **`https://strihnuto-web.github-6b5.workers.dev`**, produkční větev **`main`**, build **`npm run build`**, root **`/`**. Automatické nasazování z GitHubu zůstává stávající; žádné nové workflow se nepřidává. Vložení konfigurace do PR samo nic nenasazuje, ale po případném ručním merge může existující automatické nasazování spustit deploy.
+
+Konfigurace obsahuje `worker/index.mjs`, assets z `dist` pod bindingem `ASSETS`, `/api/*` přes Worker, `CONTACT_EMAIL` omezený na ověřeného příjemce a `CONTACT_RATE_LIMITER` (3 / 60 s, namespace 1001). `workers_dev: true` zachovává nynější typ veřejné adresy; nejsou definované nové routes ani DNS. `keep_vars: true` chrání proměnné nastavené v dashboardu, zejména budoucí `MAIL_FROM`; `SITE_ORIGIN` je spravovaný v repozitáři. Tajný klíč v konfiguraci není.
+
+`wrangler.example.jsonc` zůstává pouze obecným příkladem. Nepoužívejte jej místo produkčního souboru. Samotné nahrání dist pro serverovou část nestačí.
 
 1. **Turnstile:** v dashboardu otevřete widget se Site Key `0x4AAAAAAGCCjx_5Khzyd-a-`. Nastavte typ **Managed** a povolte skutečný hostname webu. Managed se volí v dashboardu, není to domyšlený parametr JS. Přidejte Secret Key tohoto widgetu do existujícího Workera jako šifrovaný secret **`TURNSTILE_SECRET_KEY`** (Workers & Pages → Worker → Settings → Variables and Secrets → Add → Secret). Nikdy jej nedávejte do GitHubu ani do chatu.
 2. **Příjemce:** v Email → Email Routing → Destination addresses přidejte `imperium@isb7.cz` a potvrďte ověřovací e-mail v této schránce. Stav musí být ověřený. Nelze posílat libovolným neověřeným příjemcům.
 3. **Odesílatel:** vyberte vlastní adresu na doméně se zprovozněným Cloudflare Email Routing a nastavte ji jako **`MAIL_FROM`**. Nepoužívejte e-mail zákazníka. Pokud Email Routing zatím nemáte a jeho zapnutí požaduje MX/TXT/DNS změny, zastavte se: to je samostatný krok vlastníka domény a tento PR žádné změny DNS nepovoluje ani neprovádí. Ověřte také dostupnost send_email bindingu a aktuální limity pro váš účet; bez potřebné domény nelze slíbit funkční bezplatné doručování. Žádná placená ani externí služba není automaticky zavedená.
-4. **Bindingy:** do skutečné konfigurace existujícího Workera přeneste `send_email` binding **`CONTACT_EMAIL`** s `destination_address: "imperium@isb7.cz"` a `ratelimits` binding **`CONTACT_RATE_LIMITER`** (3 / 60 s). `namespace_id` v šabloně je příklad; zvolte stabilní číselnou hodnotu nekolidující s dalšími vašimi limitery. Doplňte **`SITE_ORIGIN`** jako přesný HTTPS origin skutečného webu bez koncového lomítka (např. schéma a hostname, případně port). Worker odmítá jiný origin i hostname Turnstile.
-5. **Server a assets:** vstup `worker/index.mjs`, statické assets z `dist`, binding **`ASSETS`**, API `/api/*` musí jít nejprve do Workera (`run_worker_first`). Zachovejte současné hostingové nastavení a doménu. Šablona je ověřena jen dry-runem, nikoli na vašem účtu.
+4. **Bindingy:** `CONTACT_EMAIL`, `CONTACT_RATE_LIMITER` a `SITE_ORIGIN` jsou připravené v produkčním `wrangler.jsonc`; jejich skutečné vytvoření/použití ověří až následné nasazení na účet. Namespace `1001` je stabilně zvolen pro tento formulář; pokud jej již používá jiný váš limiter, zkontrolujte možné sdílení čítačů před nasazením. Kvóta není databází klientů.
+5. **Automatický build:** zachovejte ověřené nastavení Worker Builds: repozitář `isb7cz/strihnuto-web`, větev `main`, build `npm run build`, deploy `npx wrangler deploy`, root `/`. Secret nastavte v runtime existujícího Workera, nikoli jen jako build proměnnou. `MAIL_FROM` je runtime proměnná. Nepřidávejte novou doménu ani neměňte DNS.
 6. Po samostatně schváleném nastavení a nasazení postupujte podle následujícího testu. V tomto PR se nic nenasazuje.
 
 Oficiální podklady: [Send Email from Workers](https://developers.cloudflare.com/email-routing/email-workers/send-email-workers/), [Turnstile server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/), [Rate Limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Podmínky a limity ověřte před aktivací v aktuálním dashboardu; tento projekt nepředpokládá neověřenou existující konfiguraci.
@@ -139,10 +143,24 @@ Grafický symbol v sekci Lucie nahrazen originální fotografií ve dvou optimal
 
 ## Změny a ověření v0.5
 
-Zapojený klient formuláře, Turnstile Siteverify a Worker s validací, honeypotem, rate limiterem a příjemcem imperium@isb7.cz. Přibyla pouze šablona konfigurace a testy, žádná aktivní konfigurace, tajný klíč, databáze ani produkční balíčková závislost. Schválené texty mimo stav formuláře, ostatní sekce, fotografie a CSS jsou zachované.
+Zapojený klient formuláře, Turnstile Siteverify a Worker s validací, honeypotem, rate limiterem a příjemcem imperium@isb7.cz. Přibyla šablona i produkční wrangler.jsonc a testy; žádný tajný klíč, databáze ani produkční balíčková závislost. Konfigurace zatím nebyla nasazena. Schválené texty mimo stav formuláře, ostatní sekce, fotografie a CSS jsou zachované.
 
 - `npm test`: 19 úspěšných testů; `npm run build`: úspěch.
 - Wrangler 4.162.0: `deploy --dry-run` s lokální validační konfigurací úspěšně sestavil Worker a rozpoznal Email, Rate Limit a Assets bindingy. Nebyl proveden deployment ani účetní ověření skutečných bindingů.
 - Testy doručování a Siteverify používají simulace. Skutečné doručení zatím **neověřeno**.
 
 - Chromium / Playwright se simulovaným Turnstile a HTTP službou: 375, 768 a 1440 px; ověřený nepovinný e-mail, blokace souběžného odesílání, zachování polí při chybě, vymazání až po úspěchu a absence přetečení. Toto není živý test Managed challenge ani e-mailu.
+
+### Produkční konfigurace v PR #5
+
+Přidaný kořenový `wrangler.jsonc` podle uživatelem potvrzeného existujícího Workera a produkční URL. `MAIL_FROM` není vyplněný ani vymyšlený; manuálně je potřeba zvolit doménu vlastněnou provozovatelem s aktivním Cloudflare Email Routing a adresu na této doméně, kterou nastavíte jako runtime `MAIL_FROM`. Doména cílového příjemce `isb7.cz` sama o sobě neurčuje ani neaktivuje doménu odesílatele. Není potvrzeno, že `strihnuto.cz` nebo jiná doména již má Email Routing; žádná adresa typu noreply není přednastavená. Aktivace domény, případné MX/TXT a ověření odesílatele vyžadují samostatné ruční rozhodnutí. Bez toho, bez ověřeného příjemce nebo bez správného secretu nelze tvrdit, že e-maily chodí.
+
+Ověření konfigurace bez nasazení (po buildu):
+
+```sh
+npx wrangler deploy --dry-run --config wrangler.jsonc --outdir /tmp/strihnuto-worker-build
+```
+
+Dry-run ověří sestavení a tvar konfigurace, nikoli existenci secretu, aktivaci Email Routing, oprávnění účtu nebo skutečné doručení. Aktivní hosting, GitHub integrace a DNS se touto kontrolou nemění.
+
+Ověření produkčního doplnění: `npm test` — 20 úspěšných testů; `npm run build` — úspěch; Wrangler 4.162.0 `deploy --dry-run --config wrangler.jsonc` — úspěch, rozpoznané produkční bindingy a origin. Bez deploymentu; nepřítomnost MAIL_FROM a secretu je záměrná a do jejich ručního nastavení server bezpečně odmítne odesílání.
