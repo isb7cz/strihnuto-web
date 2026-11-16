@@ -7,7 +7,7 @@ import { renderClientStories } from '../scripts/client-stories.mjs';
 const root = new URL('../', import.meta.url);
 const html = await readFile(new URL('index.html', root), 'utf8');
 const copy = JSON.parse(await readFile(new URL('tests/fixtures/approved-copy.json', root), 'utf8'));
-const text = value => value.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+const text = value => value.replace(/\u00a0/g, ' ').replace(/<[^>]*>/g, ' ').replace(/[ \t\r\n]+/g, ' ').trim();
 
 test('Všechny schválené texty jsou doslovné, úplné a ve správném pořadí', () => {
   const ids = [...html.matchAll(/<section\b[^>]*\bid="([^"]+)"/g)].map(match => match[1]);
@@ -90,7 +90,7 @@ test('Budoucí příběhy: výchozí stav skrytý, chybějící data a souhlas b
 test('Build obsahuje pouze veřejné soubory a žádné skryté příběhy nebo jejich data', async () => {
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root });
   const built = await readFile(new URL('dist/index.html', root), 'utf8');
-  assert.equal(await readFile(new URL('dist/ochrana-osobnich-udaju/index.html', root), 'utf8'), await readFile(new URL('ochrana-osobnich-udaju/index.html', root), 'utf8'));
+  assert.equal((await readFile(new URL('dist/ochrana-osobnich-udaju/index.html', root), 'utf8')).replace(/\u00a0/g, ' '), await readFile(new URL('ochrana-osobnich-udaju/index.html', root), 'utf8'));
   assert.doesNotMatch(built, /TODO|imperium@isb7\.cz/);
   assert.deepEqual((await readdir(new URL('dist/', root))).sort(), ['assets', 'contact.js', 'index.html', 'ochrana-osobnich-udaju', 'styles.css']);
   const data = JSON.parse(await readFile(new URL('data/client-stories.json', root), 'utf8'));

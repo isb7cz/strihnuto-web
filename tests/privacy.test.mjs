@@ -4,7 +4,7 @@ import { readFile, access } from 'node:fs/promises';
 const root = new URL('../', import.meta.url);
 const privacy = await readFile(new URL('ochrana-osobnich-udaju/index.html', root), 'utf8');
 const home = await readFile(new URL('index.html', root), 'utf8');
-const text = value => value.replace(/<br\s*\/?>/g, ' ').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+const text = value => value.replace(/\u00a0/g, ' ').replace(/<br\s*\/?>/g, ' ').replace(/<[^>]*>/g, '').replace(/[ \t\r\n]+/g, ' ').trim();
 
 test('Ochrana osobních údajů obsahuje přesné schválené bloky včetně data', async () => {
   const expected = JSON.parse(await readFile(new URL('tests/fixtures/privacy-copy.json', root), 'utf8'));

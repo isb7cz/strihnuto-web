@@ -5,7 +5,7 @@ let token = '';
 let busy = false;
 let widget;
 let attempted = false;
-const setStatus = message => { status.textContent = message; };
+const setStatus = message => { status.textContent = message.replace(/(?<![\p{L}\p{N}_])([ksvzouai]) +(?=\S)/giu, '$1\u00a0'); };
 window.onContactTurnstileLoad = () => {
   widget = window.turnstile.render('#contact-turnstile', {
     sitekey: '0x4AAAAAAGCCjx_5Khzyd-a-', action: 'contact', language: 'cs', size: 'compact',
