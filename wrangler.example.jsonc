@@ -1,0 +1,18 @@
+// Template only: do not replace an existing Worker's configuration blindly.
+// Replace ALL placeholders. The real configuration must match the existing Worker.
+{
+  "name": "REPLACE_WITH_EXISTING_WORKER_NAME",
+  "main": "worker/index.mjs",
+  "compatibility_date": "2026-11-15",
+  "assets": { "directory": "./dist", "binding": "ASSETS", "run_worker_first": ["/api/*"] },
+  "vars": {
+    "SITE_ORIGIN": "https://REPLACE_WITH_ACTUAL_WEBSITE_HOST",
+    "MAIL_FROM": "REPLACE_WITH_ADDRESS_ON_EMAIL_ROUTING_DOMAIN"
+  },
+  "send_email": [{ "name": "CONTACT_EMAIL", "destination_address": "imperium@isb7.cz" }],
+  "ratelimits": [{
+    "name": "CONTACT_RATE_LIMITER", "namespace_id": "1001",
+    "simple": { "limit": 3, "period": 60 }
+  }]
+  // TURNSTILE_SECRET_KEY must be added as a Worker secret, never here.
+}

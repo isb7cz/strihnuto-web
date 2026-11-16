@@ -76,20 +76,23 @@
 <div class="contact-intro"><p class="eyebrow" aria-hidden="true">10 / Střihnuto</p><h2 id="kontakt-title">Kontaktujte nás</h2><p>Máte zájem o naše kadeřnické služby nebo se chcete informovat o možnosti individuálně zvýhodněné péče?</p>
 <p>Vyplňte krátký kontaktní formulář a stručně nám popište, co potřebujete. Na základě vaší poptávky se s vámi spojíme a domluvíme další postup.</p>
 <p>Kontaktovat nás můžete také přímo e-mailem.</p><p class="contact-todo">TODO: doplnit kontaktní e-mail</p></div><form class="contact-form" method="dialog" aria-describedby="form-status form-note">
-  <p id="form-status" class="form-status"><strong>Odesílání formuláře zatím není zapojené.</strong> Vyplněné údaje se nikam neodesílají ani neukládají. Poptávku tímto formulářem zatím nelze doručit.</p>
+  <p id="form-status" class="form-status" role="status" aria-live="polite">Pro odeslání vyplňte formulář a dokončete ověření proti spamu. Pokud se ověření nenačte, zkuste to prosím později.</p>
   <p class="field-help">Povinná pole jsou označena slovem „povinné“. Vlastní e-mail není nutný.</p>
   <div class="form-row">
-    <div class="field"><label for="name">Jméno <span>(povinné)</span></label><input id="name" name="name" autocomplete="name" required></div>
-    <div class="field"><label for="phone">Telefon <span>(povinné)</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" required></div>
+    <div class="field"><label for="name">Jméno <span>(povinné)</span></label><input id="name" name="name" maxlength="100" autocomplete="name" required></div>
+    <div class="field"><label for="phone">Telefon <span>(povinné)</span></label><input id="phone" name="phone" maxlength="40" type="tel" autocomplete="tel" required></div>
   </div>
   <div class="form-row">
-    <div class="field"><label for="email">E-mail <span>(nepovinné)</span></label><input id="email" name="email" type="email" autocomplete="email"></div>
-    <div class="field"><label for="town">Obec <span>(povinné)</span></label><input id="town" name="town" autocomplete="address-level2" required></div>
+    <div class="field"><label for="email">E-mail <span>(nepovinné)</span></label><input id="email" name="email" maxlength="254" type="email" autocomplete="email"></div>
+    <div class="field"><label for="town">Obec <span>(povinné)</span></label><input id="town" name="town" maxlength="120" autocomplete="address-level2" required></div>
   </div>
   <div class="field"><label for="request-type">Typ poptávky <span>(povinné)</span></label><select id="request-type" name="request-type" required><option value="">Vyberte typ poptávky</option><option value="standard">Běžné služby</option><option value="supported">Zájem o zvýhodněnou péči</option></select></div>
-  <div class="field"><label for="message">Popis požadavku <span>(povinné)</span></label><textarea id="message" name="message" rows="5" required></textarea></div>
+  <div class="field"><label for="message">Popis požadavku <span>(povinné)</span></label><textarea id="message" name="message" maxlength="3000" rows="5" required></textarea></div>
   <p id="form-note" class="field-help">Nejde o rezervační systém. Odeslání poptávky neznamená potvrzení termínu.</p>
-  <button class="button" type="submit" disabled aria-describedby="form-status">Poslat poptávku — zatím nedostupné</button>
+  <div hidden aria-hidden="true"><label for="website">Web</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
+  <div id="contact-turnstile"></div>
+  <noscript><p>Odeslání vyžaduje JavaScript pro ověření proti spamu. Kontaktujte nás prosím e-mailem.</p></noscript>
+  <button class="button" type="submit" disabled aria-describedby="form-status">Poslat poptávku</button>
 </form>
 </div>
 </section>
@@ -100,5 +103,7 @@
     <div class="footer-meta"><a href="#uvod">Zpět nahoru ↑</a><p>TODO: doplnit kontaktní e-mail</p><p>Informace o ochraně osobních údajů: TODO — doplnit dokument.</p><p class="author-credit">made by ISB7</p></div>
   </div>
 </footer>
+<script src="contact.js"></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onContactTurnstileLoad&amp;render=explicit" async defer></script>
 </body>
 </html>
