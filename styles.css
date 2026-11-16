@@ -572,3 +572,25 @@ footer .author-credit {
 .privacy-page h2 { font-size: clamp(28px, 3vw, 36px); margin: 42px 0 22px; }
 .privacy-page a { overflow-wrap: anywhere; }
 .form-privacy-note { max-width: 900px; margin: 20px 0 0; font-size: 16px; color: var(--muted); }
+
+/* Souvislé odstavce: mobil vlevo, tablet a počítač do bloku. */
+@media (min-width: 651px) {
+  .hero .lead p,
+  #poslani > div:last-child > p,
+  #pro-koho .section-intro,
+  #pro-koho .card p,
+  #pro-koho .section-note,
+  #jak-fungujeme > div:last-child > p,
+  #sluzby > div:last-child > p,
+  #zvyhodnena-pece .two-col > div:last-child > p,
+  #lucie .two-col > div:last-child > p,
+  #oblast > p:not(.eyebrow),
+  .contact-intro > p:not(.eyebrow):not(.contact-todo),
+  .privacy-page > p:not(:has(br)):not(:last-child):not(:nth-of-type(2)) {
+    text-align: justify;
+    hyphens: auto;
+  }
+}
+@media (max-width: 650px) {
+  #oblast > p:not(.eyebrow) { text-align: left; }
+}

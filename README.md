@@ -19,7 +19,7 @@ npm test
 npm run build
 ```
 
-Dvacet čtyři testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
+Dvacet sedm testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
 Build vytváří `dist/` pouze s `index.html`, `styles.css`, `contact.js` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. `contact.js` a Cloudflare Turnstile běží v prohlížeči; renderer příběhů se používá jen při sestavení. Worker se sestavuje samostatně pomocí Wrangleru a není statickým souborem v dist.
 
@@ -186,3 +186,13 @@ Schválený text zásad je vložen doslovně včetně data 16. listopadu 2026, j
 - Potvrdit ověření `imperium@isb7.cz`, správný runtime Turnstile secret, Managed widget, hostname a produkční bindingy.
 - Samostatně provést schválené nastavení domény/DNS, zabezpečení a nasazení. Tato změna je neprovádí.
 - Ověřit skutečné doručení obou typů poptávek (včetně bez zákaznického e-mailu), chybové stavy a limity, obě URL ochrany údajů a mobilní zobrazení na skutečné produkční doméně. Přijetí odesílací službou není důkaz doručení do schránky.
+
+## Střihnuto v1.0 – typografické doladění
+
+Souvislé odstavce jsou od 651 px zarovnané do bloku s možností automatického českého dělení slov podle podpory prohlížeče. Mobil do 650 px zůstává vlevo. Nadpisy, navigace, tlačítka, formulářová pole, krátké popisky a patička se do bloku nezarovnávají; text-align-last: justify není použitý. Nevkládají se ruční zalomení.
+
+`scripts/typography.mjs` doplňuje při buildu nezlomitelné mezery do veřejného HTML obou stránek (také po případném vykreslení příběhů). Ošetřuje malé i velké jednopísmenné předložky a spojky, krátké vazby čísel a jednotek, datum a zkratky. Cesty, odkazy, technické atributy a vložený kód nemění. Zdrojové schválené texty a jejich předlohy zůstávají nezměněné. Zobrazované stavové zprávy formuláře dostávají stejné jednopísmenné vazby při vložení do stránky; samotné požadavky a serverové odpovědi se nemění.
+
+Testy přesného obsahu normalizují U+00A0 na obyčejnou mezeru. Nový regresní test navíc porovnává úplné HTML před a po úpravě pouze s touto jedinou normalizací, takže nesmí projít žádná jiná změna textu ani značek. Kontroluje se i stabilita opakovaného zpracování.
+
+Ověření: 27 testů prošlo, build a Wrangler dry-run úspěšné. Chromium: obě stránky při 320, 375, 650, 651, 768, 1024 a 1440 px, správné přepnutí zarovnání, zachované výjimky, nezlomitelné jednopísmenné vazby a žádné horizontální přetečení. Odstavce a mezery vizuálně ověřené na tabletu a počítači. Nejde o test všech fyzických zařízení nebo všech systémových slovníků dělení slov. Bez změn hostingu, DNS a nasazení.
