@@ -189,7 +189,7 @@ Schválený text zásad je vložen doslovně včetně data 16. listopadu 2026, j
 
 ## Střihnuto v1.0 – typografické doladění
 
-Souvislé odstavce jsou od 651 px zarovnané do bloku s možností automatického českého dělení slov podle podpory prohlížeče. Mobil do 650 px zůstává vlevo. Nadpisy, navigace, tlačítka, formulářová pole, krátké popisky a patička se do bloku nezarovnávají; text-align-last: justify není použitý. Nevkládají se ruční zalomení.
+Souvislé odstavce jsou od 651 px zarovnané do bloku bez automatického dělení slov (`hyphens: none`, včetně prefixu pro Safari). Mobil do 650 px zůstává vlevo. Nadpisy, navigace, tlačítka, formulářová pole, krátké popisky a patička se do bloku nezarovnávají; text-align-last: justify není použitý. Nevkládají se ruční zalomení.
 
 `scripts/typography.mjs` doplňuje při buildu nezlomitelné mezery do veřejného HTML obou stránek (také po případném vykreslení příběhů). Ošetřuje malé i velké jednopísmenné předložky a spojky, krátké vazby čísel a jednotek, datum a zkratky. Cesty, odkazy, technické atributy a vložený kód nemění. Zdrojové schválené texty a jejich předlohy zůstávají nezměněné. Zobrazované stavové zprávy formuláře dostávají stejné jednopísmenné vazby při vložení do stránky; samotné požadavky a serverové odpovědi se nemění.
 
