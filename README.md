@@ -1,6 +1,6 @@
-# Střihnuto.cz
+# Střihnuto v1.0 – finální obsahová verze
 
-Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních balíčkových závislostí, externích fontů, analytiky, reklamy a databáze klientů. Verze v0.5 má Worker pro kontaktní formulář a Cloudflare Turnstile.
+Český statický prezentační web spolku Střihnuto, z. s. Schválená vizuální identita, originální logo a ikony z dodaného STRIHNUTO-web.zip. Bez produkčních balíčkových závislostí, externích fontů, analytiky, reklamy a databáze klientů. Verze v1.0 zachovává Worker pro kontaktní formulář a Cloudflare Turnstile.
 
 ## Spuštění
 
@@ -19,7 +19,7 @@ npm test
 npm run build
 ```
 
-Dvacet testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
+Dvacet čtyři testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
 Build vytváří `dist/` pouze s `index.html`, `styles.css`, `contact.js` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. `contact.js` a Cloudflare Turnstile běží v prohlížeči; renderer příběhů se používá jen při sestavení. Worker se sestavuje samostatně pomocí Wrangleru a není statickým souborem v dist.
 
@@ -35,7 +35,7 @@ Ochrana proti spamu: Turnstile, neveřejné honeypot pole a Workers Rate Limitin
 
 E-mail jde výhradně na serverem pevně nastavené `imperium@isb7.cz`. Obsahuje typ péče i všechna pole; při chybějícím e-mailu uvádí „Neuveden“. Případný zákaznický e-mail je pouze Reply-To, nikdy From nebo příjemce. Text zprávy je MIME UTF-8/base64; hlavičky neobsahují neověřený volný text. `CONTACT_EMAIL.send()` musí úspěšně skončit před HTTP 200. To znamená **přijetí doručovací službou, nikoliv důkaz doručení do schránky**. Při selhání je HTTP 502 a srozumitelná chyba. Při přerušení spojení nelze přijetí spolehlivě potvrdit: před opakováním zkontrolujte schránku, aby nevznikla duplicitní poptávka.
 
-Neukládáme klientské údaje do databáze, KV, localStorage ani logů aplikace. IP se používá pro Siteverify a jako SHA-256 klíč krátkodobého platformního limitu; obsah poptávky zůstává pouze ve zpracovávaném požadavku a cílovém e-mailu. Retence schránky a případné platformní request logy závisejí na nastavení provozovatele. Informace o ochraně osobních údajů je stále nutné připravit pro skutečný provoz. Cílová schránka není automaticky zveřejněna jako kontaktní adresa; původní veřejný kontakt TODO zůstává zachovaný.
+Neukládáme klientské údaje do databáze, KV, localStorage ani logů aplikace. IP se používá pro Siteverify a jako SHA-256 klíč krátkodobého platformního limitu; obsah poptávky zůstává pouze ve zpracovávaném požadavku a cílovém e-mailu. Retence schránky a případné platformní request logy závisejí na nastavení provozovatele. Schválené informace o ochraně osobních údajů jsou na `/ochrana-osobnich-udaju`. Veřejným kontaktem je `lucie@strihnuto.cz`; schránka dle zadání zatím není aktivní a musí se technicky zprovoznit. Technický příjemce formuláře zůstává `imperium@isb7.cz` a není veřejně zobrazený.
 
 ## Co nastavit v Cloudflare (ručně, bez změn provedených v tomto PR)
 
@@ -164,3 +164,25 @@ npx wrangler deploy --dry-run --config wrangler.jsonc --outdir /tmp/strihnuto-wo
 Dry-run ověří sestavení a tvar konfigurace, nikoli existenci secretu, aktivaci Email Routing, oprávnění účtu nebo skutečné doručení. Aktivní hosting, GitHub integrace a DNS se touto kontrolou nemění.
 
 Ověření produkčního doplnění: `npm test` — 20 úspěšných testů; `npm run build` — úspěch; Wrangler 4.162.0 `deploy --dry-run --config wrangler.jsonc` — úspěch, rozpoznané produkční bindingy a origin. Bez deploymentu; nepřítomnost MAIL_FROM a secretu je záměrná a do jejich ručního nastavení server bezpečně odmítne odesílání.
+
+## Střihnuto v1.0 – finální obsahová verze
+
+Veřejný obsah je podle zadání uzavřený. Doplněný klikací kontakt `lucie@strihnuto.cz` v kontaktu, patičce a zásadách ochrany údajů. Adresa zatím není aktivní. `MAIL_FROM` se v této verzi nenastavuje a serverový příjemce zůstává beze změny.
+
+Nová statická stránka `ochrana-osobnich-udaju/index.html` se kopíruje do stejné složky v dist. Assets binding ji v původní konfiguraci obsluhuje na `/ochrana-osobnich-udaju` (normalizuje na koncové lomítko) i `/ochrana-osobnich-udaju/`. Obě adresy ověřeny v lokálním Workers runtime; nebyla měněna konfigurace ani přidáván router. Stránka používá původní logo a CSS, má návrat na hlavní stránku a nenačítá Turnstile ani jiné skripty.
+
+Schválený text zásad je vložen doslovně včetně data 16. listopadu 2026, jeho předloha je v `tests/fixtures/privacy-copy.json`. U formuláře je přesný informační text s odkazem a upozornění u zprávy, bez souhlasového checkboxu. Veřejné TODO texty odstraněny, ostatní schválené texty, fotografie, identifikační údaje a skryté příběhy zachované.
+
+### Ověření v1.0
+
+- `npm test`: 24 testů prošlo; `npm run build`: úspěch.
+- Wrangler 4.162.0 `deploy --dry-run`: úspěch; bez nasazení.
+- Lokální Wrangler Workers runtime + Chromium: obě varianty URL, navigace z formuláře a patičky i návrat domů, načtení loga a žádné vodorovné přetečení při 375, 768 a 1440 px. Bez skutečného odesílání formuláře.
+- Závěrečná kontrola veřejného HTML: žádné TODO, testovací profily nebo technický příjemce. Veřejné e-mailové odkazy směřují pouze na lucie@strihnuto.cz. Bez změn schválených ostatních textů.
+
+### Zbývající technické kroky před ostrým spuštěním
+
+- Aktivovat `lucie@strihnuto.cz` a ověřit příjem i odesílání; teprve následně samostatně nastavit jako `MAIL_FROM` na způsobilé aktivní Email Routing doméně.
+- Potvrdit ověření `imperium@isb7.cz`, správný runtime Turnstile secret, Managed widget, hostname a produkční bindingy.
+- Samostatně provést schválené nastavení domény/DNS, zabezpečení a nasazení. Tato změna je neprovádí.
+- Ověřit skutečné doručení obou typů poptávek (včetně bez zákaznického e-mailu), chybové stavy a limity, obě URL ochrany údajů a mobilní zobrazení na skutečné produkční doméně. Přijetí odesílací službou není důkaz doručení do schránky.
