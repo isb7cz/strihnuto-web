@@ -75,8 +75,7 @@
 <div class="container">
 <div class="contact-intro"><p class="eyebrow" aria-hidden="true">10 / Střihnuto</p><h2 id="kontakt-title">Kontaktujte nás</h2><p>Máte zájem o naše kadeřnické služby nebo se chcete informovat o možnosti individuálně zvýhodněné péče?</p>
 <p>Vyplňte krátký kontaktní formulář a stručně nám popište, co potřebujete. Na základě vaší poptávky se s vámi spojíme a domluvíme další postup.</p>
-<p>Kontaktovat nás můžete také přímo e-mailem.</p><p class="contact-todo"><a href="mailto:lucie@strihnuto.cz">lucie@strihnuto.cz</a></p></div><form class="contact-form" method="dialog" aria-describedby="form-status form-note">
-  <p id="form-status" class="form-status" role="status" aria-live="polite">Pro odeslání vyplňte formulář a dokončete ověření proti spamu. Pokud se ověření nenačte, zkuste to prosím později.</p>
+<p>Kontaktovat nás můžete také přímo e-mailem.</p><p class="contact-todo"><a href="mailto:lucie@strihnuto.cz">lucie@strihnuto.cz</a></p></div><form class="contact-form" method="dialog" aria-describedby="form-note">
   <p class="field-help">Povinná pole jsou označena slovem „povinné“. Vlastní e-mail není nutný.</p>
   <div class="form-row">
     <div class="field"><label for="name">Jméno <span>(povinné)</span></label><input id="name" name="name" maxlength="100" autocomplete="name" required></div>
@@ -92,7 +91,8 @@
   <div hidden aria-hidden="true"><label for="website">Web</label><input id="website" name="website" tabindex="-1" autocomplete="off"></div>
   <div id="contact-turnstile"></div>
   <noscript><p>Odeslání vyžaduje JavaScript pro ověření proti spamu. Kontaktujte nás prosím e-mailem.</p></noscript>
-  <button class="button" type="submit" disabled aria-describedby="form-status">Poslat poptávku</button>
+  <button class="button" type="submit" disabled>Poslat poptávku</button>
+  <p id="form-status" class="form-status" role="status" aria-live="polite" aria-atomic="true" hidden></p>
 </form>
 <p class="form-privacy-note">Odesláním formuláře nám předáváte údaje potřebné k vyřízení vaší poptávky. Více informací najdete v <a href="/ochrana-osobnich-udaju">Ochraně osobních údajů</a>.</p>
 </div>
