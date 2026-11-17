@@ -43,8 +43,15 @@ function validate(data) {
 // Dependencies are injected in tests; no emails or verification calls are mocked in production.
 export async function handleContact(request, env, { sendMail, verifyFetch = fetch } = {}) {
   if (request.method !== 'POST') return json(405, 'Použijte prosím kontaktní formulář.');
-  if (!env.SITE_ORIGIN || !env.TURNSTILE_SECRET_KEY || !env.MAIL_FROM ||
-      !env.CONTACT_RATE_LIMITER?.limit || !sendMail) return json(503, 'Odesílání nyní není dostupné. Zkuste to prosím později.');
+  // Report only missing configuration names, never secret values.
+  const missing = [
+    !env.SITE_ORIGIN && 'SITE_ORIGIN',
+    !env.TURNSTILE_SECRET_KEY && 'TURNSTILE_SECRET_KEY',
+    !env.MAIL_FROM && 'MAIL_FROM',
+    !env.CONTACT_RATE_LIMITER?.limit && 'CONTACT_RATE_LIMITER',
+    !sendMail && 'CONTACT_EMAIL'
+  ].filter(Boolean);
+  if (missing.length) return json(503, `Formulář není nakonfigurován: ${missing.join(', ')}.`);
   let origin;
   try {
     origin = new URL(env.SITE_ORIGIN);
