@@ -599,3 +599,28 @@ html {
   -webkit-hyphens: none;
   hyphens: none;
 }
+
+/* Zřetelné potvrzení odeslání bezprostředně pod tlačítkem. */
+.contact-form .form-status {
+  margin: 18px 0 0;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--brown);
+  background: var(--cream);
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: left;
+}
+.contact-form .form-status[hidden] { display: none; }
+.contact-form .form-status[data-state="success"] {
+  border-color: #52765a;
+  border-left-color: #346342;
+  background: #e9f3e9;
+  color: #214b30;
+}
+.contact-form .form-status[data-state="error"] {
+  border-color: #a34d46;
+  border-left-color: #a34d46;
+  background: #fff0ed;
+  color: #782e27;
+}
