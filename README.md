@@ -39,7 +39,7 @@ Neukládáme klientské údaje do databáze, KV, localStorage ani logů aplikace
 
 ## Co nastavit v Cloudflare (ručně, bez změn provedených v tomto PR)
 
-V kořeni je skutečný **`wrangler.jsonc`**, který použije stávající deploy command `npx wrangler deploy`. Worker zůstává **`strihnuto-web`**, origin **`https://strihnuto-web.github-6b5.workers.dev`**, produkční větev **`main`**, build **`npm run build`**, root **`/`**. Automatické nasazování z GitHubu zůstává stávající; žádné nové workflow se nepřidává. Vložení konfigurace do PR samo nic nenasazuje, ale po případném ručním merge může existující automatické nasazování spustit deploy.
+V kořeni je skutečný **`wrangler.jsonc`**, který použije stávající deploy command `npx wrangler deploy`. Worker zůstává **`strihnuto-web`**, origin **`https://strihnuto.cz`**, produkční větev **`main`**, build **`npm run build`**, root **`/`**. Automatické nasazování z GitHubu zůstává stávající; žádné nové workflow se nepřidává. Vložení konfigurace do PR samo nic nenasazuje, ale po případném ručním merge může existující automatické nasazování spustit deploy.
 
 Konfigurace obsahuje `worker/index.mjs`, assets z `dist` pod bindingem `ASSETS`, `/api/*` přes Worker, `CONTACT_EMAIL` omezený na ověřeného příjemce a `CONTACT_RATE_LIMITER` (3 / 60 s, namespace 1001). `workers_dev: true` zachovává nynější typ veřejné adresy; nejsou definované nové routes ani DNS. `keep_vars: true` chrání proměnné nastavené v dashboardu, zejména budoucí `MAIL_FROM`; `SITE_ORIGIN` je spravovaný v repozitáři. Tajný klíč v konfiguraci není.
 
@@ -196,3 +196,7 @@ Souvislé odstavce jsou od 651 px zarovnané do bloku bez automatického dělen�
 Testy přesného obsahu normalizují U+00A0 na obyčejnou mezeru. Nový regresní test navíc porovnává úplné HTML před a po úpravě pouze s touto jedinou normalizací, takže nesmí projít žádná jiná změna textu ani značek. Kontroluje se i stabilita opakovaného zpracování.
 
 Ověření: 27 testů prošlo, build a Wrangler dry-run úspěšné. Chromium: obě stránky při 320, 375, 650, 651, 768, 1024 a 1440 px, správné přepnutí zarovnání, zachované výjimky, nezlomitelné jednopísmenné vazby a žádné horizontální přetečení. Odstavce a mezery vizuálně ověřené na tabletu a počítači. Nejde o test všech fyzických zařízení nebo všech systémových slovníků dělení slov. Bez změn hostingu, DNS a nasazení.
+
+## Produkční formulář na strihnuto.cz
+
+`SITE_ORIGIN` je `https://strihnuto.cz`. Stejná hodnota řídí povolený origin požadavků i očekávaný hostname Siteverify (`strihnuto.cz`). V Managed widgetu musí být povolený hostname `strihnuto.cz` a ve Workeru správný `TURNSTILE_SECRET_KEY`. Runtime `MAIL_FROM` nastavte v Cloudflare na `lucie@strihnuto.cz`; není součástí kódu ani vars. `keep_vars` zůstává zapnuté. CONTACT_EMAIL, příjemce imperium@isb7.cz, limity a validace zůstávají beze změny. Změna neupravuje DNS ani doménové routování.
