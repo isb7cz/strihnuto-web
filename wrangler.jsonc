@@ -4,7 +4,7 @@
   "compatibility_date": "2026-11-15",
   // Existing public workers.dev address; no custom routes or DNS changes.
   "workers_dev": true,
-  // Preserve dashboard variables, including MAIL_FROM once manually configured.
+  // Preserve dashboard secrets such as TURNSTILE_SECRET_KEY.
   "keep_vars": true,
   "assets": {
     "directory": "./dist",
@@ -12,7 +12,8 @@
     "run_worker_first": ["/api/*"]
   },
   "vars": {
-    "SITE_ORIGIN": "https://strihnuto.cz"
+    "SITE_ORIGIN": "https://strihnuto.cz",
+    "MAIL_FROM": "lucie@strihnuto.cz"
   },
   "send_email": [
     { "name": "CONTACT_EMAIL", "destination_address": "imperium@isb7.cz" }
@@ -24,6 +25,5 @@
       "simple": { "limit": 3, "period": 60 }
     }
   ]
-  // MAIL_FROM: manually configure a sender on an activated Email Routing domain.
   // TURNSTILE_SECRET_KEY: Cloudflare Worker secret only; never commit its value.
 }
