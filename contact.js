@@ -5,13 +5,17 @@ let token = '';
 let busy = false;
 let widget;
 let attempted = false;
-const setStatus = message => { status.textContent = message.replace(/(?<![\p{L}\p{N}_])([ksvzouai]) +(?=\S)/giu, '$1\u00a0'); };
+const setStatus = (message, state = 'info') => {
+  status.hidden = !message;
+  status.dataset.state = state;
+  status.textContent = message.replace(/(?<![\p{L}\p{N}_])([ksvzouai]) +(?=\S)/giu, '$1\u00a0');
+};
 window.onContactTurnstileLoad = () => {
   widget = window.turnstile.render('#contact-turnstile', {
     sitekey: '0x4AAAAAAGCCjx_5Khzyd-a-', action: 'contact', language: 'cs', size: 'compact',
-    callback(value) { token = value; button.disabled = busy; if (!attempted) setStatus('Ověření proběhlo. Poptávku můžete odeslat.'); },
-    'expired-callback'() { token = ''; button.disabled = true; setStatus('Ověření vypršelo. Proveďte jej prosím znovu.'); },
-    'error-callback'() { token = ''; button.disabled = true; setStatus('Ověření nelze načíst. Zkontrolujte připojení nebo to zkuste později.'); }
+    callback(value) { token = value; button.disabled = busy; if (!attempted) setStatus(''); },
+    'expired-callback'() { token = ''; button.disabled = true; setStatus('Ověření vypršelo. Proveďte jej prosím znovu.', 'error'); },
+    'error-callback'() { token = ''; button.disabled = true; setStatus('Ověření nelze načíst. Zkontrolujte připojení nebo to zkuste později.', 'error'); }
   });
 };
 form.addEventListener('submit', async event => {
@@ -25,11 +29,11 @@ form.addEventListener('submit', async event => {
     const result = await response.json();
     if (!response.ok) throw new Error(result.message || 'Odesílání není dostupné. Zkuste to prosím později.');
     if (response.status !== 200 || typeof result.message !== 'string') throw new Error('Odeslání nelze potvrdit.');
-    form.reset(); setStatus(result.message);
+    form.reset(); setStatus('✓ Poptávka byla úspěšně předána k odeslání. Termín tím není potvrzen.', 'success');
   } catch (error) {
     setStatus(error instanceof SyntaxError || error instanceof TypeError || error.name === 'TimeoutError' || error.name === 'AbortError'
       ? 'Odeslání nelze potvrdit. Zkontrolujte připojení. Před opakováním ověřte, zda poptávka již nepřišla.'
-      : error.message);
+      : error.message, 'error');
   } finally {
     token = ''; busy = false; button.disabled = true;
     if (window.turnstile && widget !== undefined) window.turnstile.reset(widget);
