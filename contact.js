@@ -5,6 +5,7 @@ let token = '';
 let busy = false;
 let widget;
 let attempted = false;
+let sent = false;
 const setStatus = (message, state = 'info') => {
   status.hidden = !message;
   status.dataset.state = state;
@@ -14,14 +15,14 @@ window.onContactTurnstileLoad = () => {
   widget = window.turnstile.render('#contact-turnstile', {
     sitekey: '0x4AAAAAAGCCjx_5Khzyd-a-', action: 'contact', language: 'cs', size: 'compact',
     callback(value) { token = value; button.disabled = busy; if (!attempted) setStatus(''); },
-    'expired-callback'() { token = ''; button.disabled = true; setStatus('Ověření vypršelo. Proveďte jej prosím znovu.', 'error'); },
-    'error-callback'() { token = ''; button.disabled = true; setStatus('Ověření nelze načíst. Zkontrolujte připojení nebo to zkuste později.', 'error'); }
+    'expired-callback'() { if (sent) return; token = ''; button.disabled = true; setStatus('Ověření vypršelo. Proveďte jej prosím znovu.', 'error'); },
+    'error-callback'() { if (sent) return; token = ''; button.disabled = true; setStatus('Ověření nelze načíst. Zkontrolujte připojení nebo to zkuste později.', 'error'); }
   });
 };
 form.addEventListener('submit', async event => {
   event.preventDefault();
   if (busy || !token || !form.reportValidity()) return;
-  attempted = true; busy = true; button.disabled = true; setStatus('Předáváme poptávku k odeslání…');
+  attempted = true; sent = false; busy = true; button.disabled = true; setStatus('Předáváme poptávku k odeslání…');
   const data = Object.fromEntries(new FormData(form));
   data.token = token;
   try {
@@ -29,7 +30,7 @@ form.addEventListener('submit', async event => {
     const result = await response.json();
     if (!response.ok) throw new Error(result.message || 'Odesílání není dostupné. Zkuste to prosím později.');
     if (response.status !== 200 || typeof result.message !== 'string') throw new Error('Odeslání nelze potvrdit.');
-    form.reset(); setStatus('✓ Poptávka byla úspěšně předána k odeslání. Termín tím není potvrzen.', 'success');
+    sent = true; form.reset(); setStatus('✓ Poptávka byla úspěšně předána k odeslání. Termín tím není potvrzen.', 'success');
   } catch (error) {
     setStatus(error instanceof SyntaxError || error instanceof TypeError || error.name === 'TimeoutError' || error.name === 'AbortError'
       ? 'Odeslání nelze potvrdit. Zkontrolujte připojení. Před opakováním ověřte, zda poptávka již nepřišla.'
