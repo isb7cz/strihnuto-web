@@ -15,8 +15,8 @@ export function typographyHtml(html) {
   return html.replace(/<!--[\s\S]*?-->|<[^>]+>|[^<]+/g, part => {
     if (part.startsWith('<!--')) return part;
     if (part.startsWith('<')) {
-      if (/^<(script|style)\b/i.test(part)) skip = true;
-      if (/^<\/(script|style)\b/i.test(part)) skip = false;
+      if (/^<(script|style|blockquote)\b/i.test(part)) skip = true;
+      if (/^<\/(script|style|blockquote)\b/i.test(part)) skip = false;
       if (skip) return part;
       let result = part.replace(/\b(alt|title|aria-label)="([^"]*)"/g, (_, name, value) => `${name}="${czechTypography(value)}"`);
       if (/^<meta\b/.test(result) && /(?:name="description"|property="og:(?:title|description)")/.test(result)) {

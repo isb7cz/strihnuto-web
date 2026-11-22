@@ -1,9 +1,23 @@
 {
-  "enabled": false,
-  "heading": "Příběhy našich klientů",
+  "enabled": true,
+  "heading": "Zkušenosti našich zákazníků",
   "introduction": [
-    "Za každou návštěvou stojí konkrétní člověk, jeho potřeby a životní situace. Rádi bychom vám proto přiblížili některé skutečné zkušenosti z naší práce.",
-    "Se souhlasem klientů zde sdílíme anonymizované příběhy a jejich hodnocení poskytované péče."
+    "Se souhlasem zákazníků sdílíme jejich zkušenosti s našimi kadeřnickými službami."
   ],
-  "stories": []
+  "stories": [
+    {
+      "type": "quote",
+      "clientLabel": "Kristýna",
+      "service": "melír",
+      "review": "Ja jenom, ze ten melir je bozi!😍",
+      "consentConfirmed": true
+    },
+    {
+      "type": "quote",
+      "clientLabel": "Lída",
+      "service": "společenské účesy",
+      "review": "Luci, všechny tvoje účesy včera krásné. Holkám to moc slušelo.",
+      "consentConfirmed": true
+    }
+  ]
 }
