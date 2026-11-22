@@ -624,3 +624,27 @@ html {
   background: #fff0ed;
   color: #782e27;
 }
+
+/* Autentické krátké reference: citace nad jménem a označením služby. */
+.client-reference {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 30px;
+}
+.client-reference blockquote {
+  flex: 1;
+  margin: 0 0 28px;
+  padding: 0;
+  border: 0;
+}
+.client-reference blockquote p {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(23px, 2.2vw, 28px);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.client-reference blockquote p::before { content: "„"; }
+.client-reference blockquote p::after { content: "“"; }
+.client-reference h3 { font-size: 21px; margin: 0; }
+.client-reference .reference-service { font-size: 16px; margin: 6px 0 0; }

@@ -51,7 +51,7 @@ test('Zdroje existují, povolený externí skript je pouze Turnstile, kontakty n
   assert.doesNotMatch(html, /<iframe|tel:/i);
   assert.deepEqual([...html.matchAll(/href="(mailto:[^"]+)"/g)].map(m => m[1]), ['mailto:lucie@strihnuto.cz', 'mailto:lucie@strihnuto.cz']);
   const sources = [...html.matchAll(/<script src="([^"]+)"/g)].map(m => m[1]);
-  assert.deepEqual(sources, ['contact.js', 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onContactTurnstileLoad&amp;render=explicit']);
+  assert.deepEqual(sources, ['contact.js?v=20261117-2', 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onContactTurnstileLoad&amp;render=explicit']);
   assert.doesNotMatch(html, /TODO|imperium@isb7\.cz/);
 });
 
@@ -71,9 +71,9 @@ test('Formulář má popsaná povinná pole, nepovinný e-mail a nepředstírá 
   assert.match(form, /role="status"/);
 });
 
-test('Budoucí příběhy: výchozí stav skrytý, chybějící data a souhlas blokují zveřejnění', async () => {
+test('Reference lze vypnout; chybějící data a souhlas blokují zveřejnění', async () => {
   const data = JSON.parse(await readFile(new URL('data/client-stories.json', root), 'utf8'));
-  assert.equal(data.enabled, false, 'Příběhy zůstávají ve verzi v0.3 vypnuté');
+  assert.equal(data.enabled, true, 'První schválené reference jsou zveřejněné');
   assert.deepEqual(renderClientStories({ ...data, enabled: false }), { section: '', navigation: '' });
   assert.throws(() => renderClientStories({ ...data, enabled: true, stories: [] }), /bez skutečného příběhu/);
   assert.throws(() => renderClientStories({ ...data, enabled: true, stories: [{}] }), /souhlasu/);
@@ -87,7 +87,7 @@ test('Budoucí příběhy: výchozí stav skrytý, chybějící data a souhlas b
   for (const paragraph of data.introduction) assert.ok(text(rendered.section).includes(paragraph));
 });
 
-test('Build obsahuje pouze veřejné soubory a žádné skryté příběhy nebo jejich data', async () => {
+test('Build obsahuje veřejné reference, nikoli jejich zdrojová data', async () => {
   execFileSync(process.execPath, ['scripts/build.mjs'], { cwd: root });
   const built = await readFile(new URL('dist/index.html', root), 'utf8');
   assert.equal((await readFile(new URL('dist/ochrana-osobnich-udaju/index.html', root), 'utf8')).replace(/\u00a0/g, ' '), await readFile(new URL('ochrana-osobnich-udaju/index.html', root), 'utf8'));
@@ -97,6 +97,9 @@ test('Build obsahuje pouze veřejné soubory a žádné skryté příběhy nebo 
   if (data.enabled) {
     assert.match(built, /id="pribehy"/);
     assert.match(built, /href="#pribehy"/);
+    assert.deepEqual([...built.matchAll(/<blockquote><p>([\s\S]*?)<\/p><\/blockquote>/g)].map(m => m[1]), data.stories.map(story => story.review));
+    assert.ok(built.indexOf('id="lucie"') < built.indexOf('id="pribehy"'));
+    assert.ok(built.indexOf('id="pribehy"') < built.indexOf('id="oblast"'));
   } else {
     assert.doesNotMatch(built, /Příběhy našich klientů|id="pribehy"|href="#pribehy"|client-stories|Za každou návštěvou/);
   }

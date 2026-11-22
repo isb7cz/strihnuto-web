@@ -19,7 +19,7 @@ npm test
 npm run build
 ```
 
-Dvacet sedm testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
+Třicet jedna testů kontroluje doslovné znění a pořadí schválených textů, odstranění starých sloganů, navigaci, lokální podklady, rozhraní formuláře, budoucí vykreslování příběhů a veřejný výstup buildu. Schválená předloha se změnami v0.3 je v `tests/fixtures/approved-copy.json`; neměňte ji jen proto, aby test zakryl odchylku od zadání.
 
 Build vytváří `dist/` pouze s `index.html`, `styles.css`, `contact.js` a `assets/`. Soukromé pracovní podklady, testy ani zdrojová data příběhů se do výstupu nekopírují. `contact.js` a Cloudflare Turnstile běží v prohlížeči; renderer příběhů se používá jen při sestavení. Worker se sestavuje samostatně pomocí Wrangleru a není statickým souborem v dist.
 
@@ -64,28 +64,28 @@ Až budou nastavené bindingy a secret a bude zvlášť povolené nasazení:
 4. V odděleném testovacím Workeru ověřte chybný/expirující token, opakování tokenu, překročení limitu a chybějící e-mailový binding. Musí následovat chyba, nikdy falešný úspěch; neničte kvůli testu produkční nastavení.
 5. Pokud zpráva není ve schránce, ověřte příjemce, MAIL_FROM a stav Email Routing. Neopakujte bez kontroly slepě zprávy a nesdílejte logy s obsahem klientských údajů. Po testu testovací e-maily podle potřeby odstraňte.
 
-## Příběhy klientů — připravené, nezveřejněné
+## Zkušenosti zákazníků a budoucí příběhy
 
-Soubor `data/client-stories.json` má `enabled: false` a prázdné pole `stories`. Obsahuje přesný schválený nadpis a oba úvodní odstavce. `scripts/client-stories.mjs` připravuje sekci i navigační odkaz pouze při buildu. Ve vypnutém stavu není ve veřejném HTML ani navigaci nic z této sekce, žádné prázdné karty či skryté profily. Data samotná se do `dist/` nikdy nekopírují.
+`data/client-stories.json` má `enabled: true` a obsahuje dvě autentické zákaznické citace Kristýny a Lídy se souhlasem se zveřejněním potvrzeným zadavatelem. Jde pouze o křestní jména a skutečně uvedené služby; žádný věk, oblast, životní situace, fotografie ani screenshot nebyly doplněné.
 
-Budoucí zapnutí:
+Sekce zůstává na původním místě mezi Lucií a oblastí působení. Nadpis i navigační odkaz vycházejí z `heading`. Na počítači jsou dvě karty vedle sebe, na mobilu pod sebou. V citacích se zachovává přesné původní znění včetně diakritiky či její absence, interpunkce a emoji; typografický build obsah blockquote neupravuje.
 
-1. Získejte skutečné anonymizované příběhy a souhlasy klientů se zveřejněním.
-2. Do `stories` přidejte záznamy s následujícími poli. Zapisujte jen schválené údaje určené ke zveřejnění, bez jmen či citlivých pracovních poznámek.
-3. Nastavte `enabled` na `true` a spusťte `npm test` a `npm run build`. Sekce se objeví mezi Lucií a oblastí působení, automaticky přibude i položka navigace.
-4. Zkontrolujte hotový obsah v `dist/`. Vypnutí se provádí vrácením `enabled` na `false` a novým buildem.
+### Přidání další reference
 
-| Pole záznamu | Typ a význam |
+Do pole `stories` přidejte skutečný záznam určený ke zveřejnění a spusťte `npm test` a `npm run build`. Ukládejte pouze schválené údaje, nikoli soukromé pracovní poznámky nebo screenshoty. Pole:
+
+| Pole | Význam |
 | --- | --- |
-| `clientLabel` | Neprázdný text: anonymizované označení klienta |
-| `approximateAge` | Neprázdný text: přibližný věk |
-| `area` | Neprázdný text: přibližná oblast |
-| `situation` | Neprázdný text: skutečná životní situace |
-| `service` | Neprázdný text: skutečně poskytnutá služba |
-| `review` | Neprázdný text: autentické hodnocení klienta |
-| `consentConfirmed` | `true` až po potvrzení souhlasu; příznak nenahrazuje evidenci souhlasu |
+| `type` | `quote` pro krátkou citaci, `story` pro delší příběh; chybějící typ znamená původní `story` |
+| `clientLabel` | Povinné schválené označení; u současných referencí pouze křestní jméno |
+| `service` | Povinné stručné skutečné označení služby |
+| `review` | Povinná autentická citace, nikdy nepřepisovat nebo vylepšovat |
+| `consentConfirmed` | Musí být `true` po potvrzení souhlasu; nenahrazuje evidenci souhlasu |
+| `approximateAge`, `area`, `situation` | Dobrovolné texty pro delší příběhy; vyplňovat jen skutečné schválené údaje, jinak vynechat |
 
-Zapnutí bez příběhu, bez některého pole nebo bez potvrzení souhlasu způsobí chybu buildu. Texty se při vykreslení escapují, nevkládejte HTML. Nejsou připravené žádné fiktivní klientské příklady. Testovací sentinel `<TEST>` slouží jen k ověření escapování a není součástí veřejného výstupu.
+Krátká karta zobrazuje jen citaci, označení zákazníka a službu. Delší příběh může zobrazit další dostupné údaje; chybějící údaje se nevymýšlejí ani nevykreslují jako prázdné řádky. Zapnutí bez reference, chybějící povinné pole nebo souhlas a neznámý typ způsobí chybu buildu. Texty jsou escapované proti vložení HTML.
+
+Pro dočasné vypnutí celé sekce nastavte `enabled: false` a znovu sestavte web: zmizí sekce i navigační odkaz. Zdrojový JSON se do dist nekopíruje. Testovací technické řetězce slouží pouze k ověření rendereru, nejsou zveřejněné.
 
 ## Fotografie Lucie (v0.4)
 
@@ -200,3 +200,11 @@ Ověření: 27 testů prošlo, build a Wrangler dry-run úspěšné. Chromium: o
 ## Produkční formulář na strihnuto.cz
 
 `SITE_ORIGIN` je `https://strihnuto.cz`. Stejná hodnota řídí povolený origin požadavků i očekávaný hostname Siteverify (`strihnuto.cz`). V Managed widgetu musí být povolený hostname `strihnuto.cz` a ve Workeru správný `TURNSTILE_SECRET_KEY`. Runtime `MAIL_FROM` nastavte v Cloudflare na `lucie@strihnuto.cz`; není součástí kódu ani vars. `keep_vars` zůstává zapnuté. CONTACT_EMAIL, příjemce imperium@isb7.cz, limity a validace zůstávají beze změny. Změna neupravuje DNS ani doménové routování.
+
+## První dvě skutečné zákaznické reference
+
+Aktivované Zkušenosti našich zákazníků: doslovné zprávy Kristýny (melír) a Lídy (společenské účesy). Přidaný typ krátké citace a zachovaná podpora delších příběhů, bez vymyšlených doplňujících údajů. Ostatní schválený obsah, formulář, zabezpečení, e-mailové služby, grafické podklady a konfigurace zůstávají beze změny.
+
+Testy odpovídají také dvěma již existujícím změnám aktuálního main: schválenému MAIL_FROM v konfiguraci a verzi URL klientského skriptu. Tyto hodnoty se tímto úkolem nemění.
+
+Ověření referencí: 31 automatických testů a build prošly. Chromium při 320, 375, 650, 651, 768 a 1440 px: přesné znění obou citací v DOM, pouze křestní jména a označení služby, funkční navigace, dvě karty vedle sebe od 651 px a pod sebou na mobilu, bez vodorovného přetečení. Karty vizuálně ověřeny na mobilu i počítači.
